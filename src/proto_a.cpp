@@ -12,18 +12,19 @@ ISR(TIMER2_COMPA_vect) {
 
     // No need to clear the interrupt source since the Timer2 compare
     // interrupt is automatically cleard in hardware when the ISR runs.
-
     QF::TICK(&l_TIMER2_COMPA);                // process all armed time events
 }
 
 //............................................................................
 void QF::onStartup(void) {
-          // set Timer2 in CTC mode, 1/1024 prescaler, start the timer ticking
+
+	// set Timer2 in CTC mode, 1/1024 prescaler, start the timer ticking
     TCCR2A = (1 << WGM21) | (0 << WGM20);
     TCCR2B = (1 << CS22 ) | (1 << CS21) | (1 << CS20);               // 1/2^10
     ASSR &= ~(1 << AS2);
     TIMSK2 = (1 << OCIE2A);                 // Enable TIMER2 compare Interrupt
     TCNT2 = 0;
+
     OCR2A = TICK_DIVIDER;     // must be loaded last for Atmega168 and friends
 }
 //............................................................................
@@ -31,9 +32,6 @@ void QF::onCleanup(void) {
 }
 //............................................................................
 void QF::onIdle() {
-
-    USER_LED_ON();     // toggle the User LED on Arduino on and off, see NOTE1
-    USER_LED_OFF();
 
 #ifdef SAVE_POWER
 
@@ -44,7 +42,7 @@ void QF::onIdle() {
     __asm__ __volatile__ ("sleep" "\n\t" :: );
 
     SMCR = 0;                                              // clear the SE bit
-
+   // Serial.println("onIdle");
 #else
     QF_INT_ENABLE();
 #endif
@@ -52,18 +50,19 @@ void QF::onIdle() {
 //............................................................................
 void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
     QF_INT_DISABLE();                                // disable all interrupts
-    USER_LED_ON();                                  // User LED permanently ON
+    //USER_LED_ON();                                  // User LED permanently ON
     asm volatile ("jmp 0x0000");    // perform a software reset of the Arduino
 }
 
 //............................................................................
 void BSP_init(void) {
+	DDRB  = 0xFF;                     // All PORTB pins are outputs (user LED)
+	PORTB = 0x00;
+
   Serial.begin(115200);   // set the highest stanard baud rate of 115200 bps
-  Serial.println("Start");
-  
+
   accessoryActive.bspInit();
   moveActive.bspInit();
-
 }
 
 // Local-scope objects -------------------------------------------------------
@@ -83,7 +82,7 @@ void setup(){
   QF::psInit(subscrSto, Q_DIM(subscrSto));     // init publish-subscribe
 
   // start the active objects...
-  accessoryActive.start(1);
   moveActive.start(2);
+  accessoryActive.start(1);
 }
   

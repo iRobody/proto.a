@@ -4,26 +4,25 @@
 #include <androidAccessory/AndroidAccessory.h>
 #include <qp/qp_port.h>
 
-#ifdef __CLASS__
 #undef __CLASS__
-#endif
 #define __CLASS__ AccessoryActive
-
 class AccessoryActive: public QActive {
-  static AndroidAccessory acc;
-  static QEvent const *eQueue[2];
-  AccessoryActive* me;
-public:
-  //state handlers
-  QSTATE_HANDLER(kick);
-  QSTATE_HANDLER(ready);
 
+	static AndroidAccessory acc;
 public:
-  AccessoryActive();
-  void start( byte prio);
-  //int handler
-  static void intHandler();  
-  void bspInit();
+	//interrupt handler
+	static void intHandler();
+
+	AccessoryActive();
+	void start( byte prio);
+	void bspInit();
+
+
+// state handlers
+public:
+  QSTATE_HANDLER(initial);
+  QSTATE_HANDLER(run);
+
 };
 
 extern AccessoryActive accessoryActive;

@@ -3,10 +3,7 @@
 
 #include <qp/qp_port.h>
 
-#undef __CLASS__
-#define __CLASS__ MoveActive
 class MoveActive : public QActive {
-
 public:
   MoveActive();
   void start( uint8_t prio);

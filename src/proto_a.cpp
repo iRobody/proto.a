@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #include <qp/qp_port.h>
-#include <irobody/events.h>
+#include <robody/events.h>
 
 #include "bsp.h"
 #include "accessoryActive.h"
@@ -50,7 +50,10 @@ void QF::onIdle() {
 //............................................................................
 void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
     QF_INT_DISABLE();                                // disable all interrupts
-    //USER_LED_ON();                                  // User LED permanently ON
+    while(1) {
+    	USER_LED_TOGGLE();
+    	delay(10000);
+    }
     asm volatile ("jmp 0x0000");    // perform a software reset of the Arduino
 }
 
@@ -61,24 +64,31 @@ void BSP_init(void) {
 
   Serial.begin(115200);   // set the highest stanard baud rate of 115200 bps
 
-  accessoryActive.bspInit();
   moveActive.bspInit();
+  accessoryActive.bspInit();
 }
 
 // Local-scope objects -------------------------------------------------------
-static QSubscrList   subscrSto[MAX_PUB_SIG];
+static QSubscrList   subscrSto[MAX_PUB_EVENT_CH];
 
-static union SmallEvents {
+static union MinEvents {
     void   *e0;                                          // minimum event size
     uint8_t e1[sizeof(QEvent)];
     // ... other event types to go into this pool
-} eventPool[10];                        // storage for the small event pool
+} minEPool[8];                        // storage for the small event pool
+
+static union MaxEvents {
+    void   *e0;                                          // minimum event size
+    uint8_t e1[sizeof(QEventMax)];
+    // ... other event types to go into this pool
+} maxEPool[16];
 
 void setup(){
   BSP_init(); 
-  QF::init(&accessoryActive);       // initialize the framework and the underlying RT kernel
+  QF::init();       // initialize the framework and the underlying RT kernel
   // initialize event pools...
-  QF::poolInit(eventPool, sizeof(eventPool), sizeof(eventPool[0]));
+  QF::poolInit(minEPool, sizeof(minEPool), sizeof(minEPool[0]));
+  QF::poolInit(maxEPool, sizeof(maxEPool), sizeof(maxEPool[0]));
   QF::psInit(subscrSto, Q_DIM(subscrSto));     // init publish-subscribe
 
   // start the active objects...

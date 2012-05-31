@@ -4,27 +4,28 @@
 #include <androidAccessory/AndroidAccessory.h>
 #include <qp/qp_port.h>
 
-#undef __CLASS__
-#define __CLASS__ AccessoryActive
-class AccessoryActive: public QActive {
-
-	static AndroidAccessory acc;
+class AccessoryActive: public QActive, public AndroidAccessory{
 public:
 	//interrupt handler
-	static void intHandler();
+	static void IntHandler();
+	void intHandler();
 
 	AccessoryActive();
 	void start( byte prio);
 	void bspInit();
 
-
 // state handlers
 public:
   QSTATE_HANDLER(initial);
-  QSTATE_HANDLER(run);
-
+  //acc_disconnected
+  QSTATE_HANDLER(acc_disconnected);
+  //acc_connecting {settle,configure}
+  QSTATE_HANDLER(acc_connecting);
+  QSTATE_HANDLER(usb_settle);
+  QSTATE_HANDLER(usb_configure);
+  //acc_connected { usb_running }
+  QSTATE_HANDLER(acc_connected);
 };
 
 extern AccessoryActive accessoryActive;
-
 #endif //_ACCESSORYACTIVE_H

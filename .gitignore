@@ -21,3 +21,6 @@ local.properties
 # eclipse output
 Release
 Debug
+
+# vim swp
+*.swp

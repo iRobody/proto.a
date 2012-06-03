@@ -75,7 +75,7 @@ static union MinEvents {
     void   *e0;                                          // minimum event size
     uint8_t e1[sizeof(QEvent)];
     // ... other event types to go into this pool
-} minEPool[8];                        // storage for the small event pool
+} minEPool[16];                        // storage for the small event pool
 
 static union MaxEvents {
     void   *e0;                                          // minimum event size

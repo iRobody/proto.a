@@ -13,6 +13,12 @@ public:
 	AccessoryActive();
 	void start( byte prio);
 	void bspInit();
+	/**
+	 * recognize and relay event upstream, if enabled.
+	 * otherwise ignore events
+	 * return true is handled, false to continue
+	 */
+	bool relayEvent( const QEvent* event, bool enable= true);
 
 // state handlers
 public:

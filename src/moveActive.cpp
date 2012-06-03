@@ -25,15 +25,23 @@ QSTATE_HANDLER_DEF(MoveActive, initial, event) {
 	subscribe(EVENT_CH_MOVE_C);
 	return Q_TRAN(&MoveActive::run);
 }
-
+static QTimeEvt timeE = QTimeEvt(EVENT_SIG_TIMEOUT);
+static QEvent moveEvent = QEVENT_PUB( EVENT_CH_MOVE_S, MV_SIG_FORWARD);
 QSTATE_HANDLER_DEF(MoveActive, run, event) {
 	switch( event->sig) {
 	case MV_SIG_FORWARD:
 		LOG( "get one command");
 		return Q_HANDLED();
-	case Q_ENTRY_SIG:
+	case MV_SIG_SPEED:
+		LOG("got speed command");
+		return Q_HANDLED();
+	case EVENT_SIG_TIMEOUT:
+		LOG("moving");
+		QF::publish( &moveEvent);
+		timeE.postIn( this, MS2TICKS(5000));
+		return Q_HANDLED();
 	case Q_INIT_SIG:
-		LOG("init run");
+		//timeE.postIn( this, MS2TICKS(5000));
 		return Q_HANDLED();
 	}
 	LOG("run");

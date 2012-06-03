@@ -7,7 +7,7 @@
 
 // Sys timer tick per seconds
 #define BSP_TICKS_PER_SEC    100
-#define MS2TICKS( t)	(BSP_TICKS_PER_SEC / 1000.0 *t )
+#define MS2TICKS( t)	(BSP_TICKS_PER_SEC / 1000.0 * t  )
 
 #define SAVE_POWER
 

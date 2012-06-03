@@ -41,7 +41,7 @@ QSTATE_HANDLER_DEF(MoveActive, run, event) {
 		timeE.postIn( this, MS2TICKS(5000));
 		return Q_HANDLED();
 	case Q_INIT_SIG:
-		//timeE.postIn( this, MS2TICKS(5000));
+		timeE.postIn( this, MS2TICKS(5000));
 		return Q_HANDLED();
 	}
 	LOG("run");

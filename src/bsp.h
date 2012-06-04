@@ -29,5 +29,13 @@
 #define USER_LED_OFF()     (PORTB &= ~(1 << (7)))
 #define USER_LED_TOGGLE()  (PORTB ^= (1 << (7)))
 
+//move bsp support
+#define MA_DIR 4
+#define MA_PWM 5
+//motor right at B channel
+#define MB_DIR 7
+#define MB_PWM 6
+
+void bspMove( bool leftForward, byte leftSpeed, bool rightForward, byte rightSpeed);
 
 #endif //_BSP_H

@@ -69,7 +69,7 @@ void BSP_init(void) {
 }
 
 // Local-scope objects -------------------------------------------------------
-static QSubscrList   subscrSto[MAX_PUB_EVENT_CH];
+static QSubscrList   subscrSto[MAX_ROBODY_PUB_EVENT_CH];
 
 static union MinEvents {
     void   *e0;                                          // minimum event size

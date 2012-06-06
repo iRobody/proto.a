@@ -47,19 +47,17 @@ void AccessoryActive::intHandler() {
 	if( irq & bmRCVDAVIRQ) {
 		QEvent* pEvent = Q_NEW(QEventMax,0);
 		char* buff = (char*)&pEvent->type;
-		while( pEvent && readFIFO( buff, EVENT_HEADER_SIZE)) {
-			buff = (char*)&(pEvent->type) + EVENT_HEADER_SIZE;
-			if( pEvent->length)
-				if(!readFIFO( buff, pEvent->length))
-					break;
+		while( pEvent && readFIFO( buff, EVENT_SERDES_SIZE)) {
 			pEvent->type = 0;
 			QF::publish(pEvent);
 			//request for next package
 			reqIn();
+			usb.regWr( rHIRQ, bmRCVDAVIRQ);
 			return;
 		}
 		if( pEvent)
 			QF::gc( pEvent);
+		usb.regWr( rHIRQ, bmRCVDAVIRQ);
 	}
 
 	if( irq & bmHXFRDNIRQ) {
@@ -86,7 +84,6 @@ void AccessoryActive::start( byte prio) {
 
 void AccessoryActive::bspInit() {
 	powerOn();
-	LOG("power on ");
 	attachInterrupt(INT6, AccessoryActive::IntHandler, LOW);
 }
 
@@ -185,7 +182,7 @@ QSTATE_HANDLER_DEF(AccessoryActive, usb_configure, event) {
 		timeE.disarm();
 		break;
 	case Q_INIT_SIG:
-		timeE.postIn( this, MS2TICKS(20));
+		timeE.postIn( this, MS2TICKS(50));
 		return Q_HANDLED();
 	case EVENT_SIG_TIMEOUT:
 		LOG("get desc size");

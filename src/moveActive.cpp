@@ -27,7 +27,7 @@ void MoveActive::bspInit() {
 }  
 
 void MoveActive::direct(bool forward, byte speed) {
-	move( true, speed, true, speed);
+	move( forward, speed, forward, speed);
 }
 
 void MoveActive::steer( bool left, byte speed) {

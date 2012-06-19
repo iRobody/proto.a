@@ -21,13 +21,13 @@ static QTimeEvt timeE = QTimeEvt(EVENT_SIG_TIMEOUT);
 
 void AccessoryActive::intHandler() {
 	byte irq = usb.IntHandler();
-
-	if( irq & bmBUSEVENTIRQ) {
+	//bus reset finished
+	if( irq & bmBUSEVENTIRQ ) {
 		usb.disInt(bmBUSEVENTIE);
 		postFIFO(&busEvent);
 		return;
 	}
-
+	//device reset or plug-in/out
 	if( irq & bmCONDETIRQ) {
 		if( usb.devAttached()) {
 			postFIFO(&attEvent);
@@ -37,7 +37,7 @@ void AccessoryActive::intHandler() {
 		}
 		return;
 	}
-
+	//first SOF
 	if( irq & bmFRAMEIRQ) {
 		usb.disSOF();
 		postFIFO(&sofEvent);
@@ -154,20 +154,20 @@ QSTATE_HANDLER_DEF(AccessoryActive, usb_settle, event) {
 	switch(  event->sig) {
 	case Q_INIT_SIG:
 		usb.init();
-		LOG("prepare to settle");
+		//LOG("prepare to settle");
 		timeE.postIn( this, MS2TICKS(200));
 		return Q_HANDLED();
 	case EVENT_SIG_TIMEOUT:
-		LOG("to reset bus now");
+		//LOG("to reset bus now");
 		usb.busReset();
 		usb.enInt( bmBUSEVENTIE);
 		return Q_HANDLED();
 	case ACC_SIG_BUSEVENT:
-		LOG("wait for SOF");
+		//LOG("wait for SOF");
 		usb.enSOF();
 		return Q_HANDLED();
 	case ACC_SIG_SOF:
-		LOG("configuring");
+		//LOG("configuring");
 		return Q_TRAN( &AccessoryActive::usb_configure);
 	}
 	return Q_SUPER( &AccessoryActive::acc_connecting);
@@ -182,16 +182,15 @@ QSTATE_HANDLER_DEF(AccessoryActive, usb_configure, event) {
 		timeE.disarm();
 		break;
 	case Q_INIT_SIG:
-		timeE.postIn( this, MS2TICKS(50));
+		timeE.postIn( this, MS2TICKS(20));
 		return Q_HANDLED();
 	case EVENT_SIG_TIMEOUT:
-		LOG("get desc size");
-		usb.init();
+		//LOG("get desc size");
 		if( usb.getDescSize()) {
-			LOG("addressing");
+			//LOG("addressing");
 			usb.setAddress();
 		}
-		LOG("connecting");
+		//LOG("connecting");
 		if( connect())
 			return Q_TRAN( &AccessoryActive::acc_connected);
 		else

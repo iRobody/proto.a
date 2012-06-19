@@ -98,6 +98,10 @@ QSTATE_HANDLER_DEF(MoveActive, run, event) {
 	{
 		MoveRawEvent* pE = (MoveRawEvent*)event;
 		move( pE->lF, pE->lS, pE->rF, pE->rS);
+		Serial.print("left Forward:");Serial.print(pE->lF,10);
+		Serial.print("left Speed:");Serial.print(pE->lS,10);
+		Serial.print("right Forward:");Serial.print(pE->rF,10);
+		Serial.print("right Speed:");Serial.print(pE->rS,10);
 	}
 		return Q_HANDLED();
 	case Q_INIT_SIG:

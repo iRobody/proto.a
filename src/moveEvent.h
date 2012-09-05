@@ -10,36 +10,29 @@
 
 #include <qp/qp_port.h>
 
-struct MoveDirectEvent {
-	struct QEvent e;
-	byte forward;
-	byte speed;
-};
-
-struct MoveSteerEvent {
-	struct QEvent e;
-	byte left;
-	byte speed;
-};
-
-struct MoveAccelEvent {
-	struct QEvent e;
-	byte accel;
-	byte speed;
-};
-
-struct MoveBrakeEvent {
-	struct QEvent e;
-	byte hard;
-};
-
+#define MOVE_RAW_DATA_LEN 2
 struct MoveRawEvent {
 	struct QEvent e;
-	byte lF;
-	byte lS;
-	byte rF;
-	byte rS;
+	char leftSpeed;
+	char rightSpeed;
 };
 
+#define MOVE_STEER_DATA_LEN 1
+struct MoveSteerEvent {
+	struct QEvent e;
+	char direction;
+};
+
+#define MOVE_ACCEL_DATA_LEN 1
+struct MoveAccelEvent {
+	struct QEvent e;
+	char speed;
+};
+
+#define MOVE_BRAKE_DATA_LEN 1
+struct MoveBrakeEvent {
+	struct QEvent e;
+	byte level;
+};
 
 #endif /* MOVEEVENT_H_ */

@@ -1,11 +1,12 @@
 #include <Arduino.h>
 
 #include <qp/qp_port.h>
-#include <robody/events.h>
+#include <qp/events.h>
 
 #include "bsp.h"
 #include "accessoryActive.h"
 #include "moveActive.h"
+#include "rangeActive.h"
 
 // ISRs ----------------------------------------------------------------------
 ISR(TIMER2_COMPA_vect) {
@@ -50,6 +51,8 @@ void QF::onIdle() {
 //............................................................................
 void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
     QF_INT_DISABLE();                                // disable all interrupts
+	DDRB  = 0xFF;                     // All PORTB pins are outputs (user LED)
+	PORTB = 0x00;
     while(1) {
     	USER_LED_TOGGLE();
     	delay(10000);
@@ -59,17 +62,16 @@ void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
 
 //............................................................................
 void BSP_init(void) {
-	DDRB  = 0xFF;                     // All PORTB pins are outputs (user LED)
-	PORTB = 0x00;
 
   Serial.begin(115200);   // set the highest stanard baud rate of 115200 bps
 
+  rangeActive.bspInit();
   moveActive.bspInit();
   accessoryActive.bspInit();
 }
 
 // Local-scope objects -------------------------------------------------------
-static QSubscrList   subscrSto[MAX_ROBODY_PUB_EVENT_CH];
+static QSubscrList   subscrSto[VALID_ROBODY_PUB_EVENT_CH];
 
 static union MinEvents {
     void   *e0;                                          // minimum event size
@@ -81,10 +83,10 @@ static union MaxEvents {
     void   *e0;                                          // minimum event size
     uint8_t e1[sizeof(QEventMax)];
     // ... other event types to go into this pool
-} maxEPool[16];
+} maxEPool[64];
 
 void setup(){
-  BSP_init(); 
+  BSP_init();
   QF::init();       // initialize the framework and the underlying RT kernel
   // initialize event pools...
   QF::poolInit(minEPool, sizeof(minEPool), sizeof(minEPool[0]));
@@ -92,6 +94,7 @@ void setup(){
   QF::psInit(subscrSto, Q_DIM(subscrSto));     // init publish-subscribe
 
   // start the active objects...
+  rangeActive.start(3);
   moveActive.start(2);
   accessoryActive.start(1);
 }

@@ -1,10 +1,12 @@
 #include <Arduino.h>
-#include <robody/events.h>
+#include <qp/events.h>
 
 #include "bsp.h"
 #include "accessoryActive.h"
 
+#if DEBUG
 static const char* TAG = "accessory";
+#endif
 
 AccessoryActive accessoryActive = AccessoryActive();
 
@@ -154,20 +156,20 @@ QSTATE_HANDLER_DEF(AccessoryActive, usb_settle, event) {
 	switch(  event->sig) {
 	case Q_INIT_SIG:
 		usb.init();
-		//LOG("prepare to settle");
+		LOG("prepare to settle");
 		timeE.postIn( this, MS2TICKS(200));
 		return Q_HANDLED();
 	case EVENT_SIG_TIMEOUT:
-		//LOG("to reset bus now");
+		LOG("to reset bus now");
 		usb.busReset();
 		usb.enInt( bmBUSEVENTIE);
 		return Q_HANDLED();
 	case ACC_SIG_BUSEVENT:
-		//LOG("wait for SOF");
+		LOG("wait for SOF");
 		usb.enSOF();
 		return Q_HANDLED();
 	case ACC_SIG_SOF:
-		//LOG("configuring");
+		LOG("configuring");
 		return Q_TRAN( &AccessoryActive::usb_configure);
 	}
 	return Q_SUPER( &AccessoryActive::acc_connecting);
@@ -185,12 +187,12 @@ QSTATE_HANDLER_DEF(AccessoryActive, usb_configure, event) {
 		timeE.postIn( this, MS2TICKS(20));
 		return Q_HANDLED();
 	case EVENT_SIG_TIMEOUT:
-		//LOG("get desc size");
+		LOG("get desc size");
 		if( usb.getDescSize()) {
-			//LOG("addressing");
+			LOG("addressing");
 			usb.setAddress();
 		}
-		//LOG("connecting");
+		LOG("connecting");
 		if( connect())
 			return Q_TRAN( &AccessoryActive::acc_connected);
 		else
